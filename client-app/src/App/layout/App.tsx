@@ -1,46 +1,51 @@
-import React, {Component} from 'react';
-import { Header, Icon, List } from 'semantic-ui-react'
+import React, {useState, useEffect, Fragment} from 'react';
+import { Header, Icon, List, Container } from 'semantic-ui-react'
 import { render } from '@testing-library/react';
 import axios from 'axios'
+import {IActivity} from '../model/activity'
+import NavBar from '../../Features/nav/NavBar';
+import ActivityDashboard from '../../Features/activities/dashboard/ActivityDashboard'
 
-class App extends Component {
-  // values --> tableau de valeurs à afficher
-  state = {
-    values : []
-  }
-  //componentDidMount 
-  //setState dans componentDidMount !!! a éviter, ralentit
-  componentDidMount(){
-    axios.get('http://localhost:5000/api/values')
-    .then((response)=>{
-      
-      this.setState({
-        values: response.data
-      })
-    })
+const App = ()=>{
+  const [activities, setActivities] = useState<IActivity[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
+ // const [editActivity, setEditedActivity] = useState<IActivity>()
+  const [editMode, setEditMode] = useState(false);
 
+  const handleOpenCreateForm = () =>{
+    setSelectedActivity(null);
+    setEditMode(true);
   }
-  render(){
-    return ( 
-      <div>
-         <Header as='h2'>
-            <Icon name='users' />
-            <Header.Content>react test</Header.Content>
-        </Header>
-        
-         
-          {/* Affichage des valeurs du array values */}
-          <List>
-            {this.state.values.map((value: any) => (
-              <List.Item key={value.id}>{value.name}</List.Item>
-            ))}
-          </List>
-  
 
-      </div>
-    );
+  const handleSelectedActivity = (id: string) =>{
+    setSelectedActivity(activities.filter(a => a.id === id)[0]);
   }
-  
+
+  useEffect(()=>{
+    axios.get<IActivity[]>('http://localhost:5000/api/activities')
+    .then((response)=>{      
+      setActivities(response.data)
+    });
+  }, []);
+
+  return ( 
+    <Fragment>
+      <NavBar openCreateForm = {handleOpenCreateForm}/>
+      {/* Affichage des valeurs du array values */}
+      <Container style= {{marginTop: '7rem'}}>
+        <ActivityDashboard 
+          activities={activities}
+          selectActivity={handleSelectedActivity}
+// {selectedActivity!}==== le ! permet de passer une erreur IActivity or null           
+          selectedActivity={selectedActivity!}
+          editMode = {editMode}
+          setEditMode = {setEditMode}
+          setSelectedActvity={setSelectedActivity}
+        />
+      </Container>
+    </Fragment  >
+  );          
 }
 
 export default App;
+
