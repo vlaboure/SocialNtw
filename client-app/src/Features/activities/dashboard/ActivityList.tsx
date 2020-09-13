@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { SyntheticEvent } from 'react'
 import { Item, Button, Label, Segment } from 'semantic-ui-react'
 import {IActivity} from '../../../App/model/activity'
 
@@ -7,9 +7,17 @@ interface IProps {
     //tableau d'activités passées en paramètre à ActivityDashboard
     activities: IActivity[];
     selectActivity: (id: string)=>void;
+    deleteActivity: (event: SyntheticEvent<HTMLButtonElement>,id: string)=>void;
+    submitting : boolean;
+    target: string;
 }
 
-const ActivityList : React.FC<IProps> = ({activities, selectActivity}) => {
+const ActivityList : React.FC<IProps> = ({
+    activities, 
+    selectActivity, 
+    deleteActivity,
+    submitting,
+    target}) => {
     return (
         <Segment clearing>
             <Item.Group divided>            
@@ -24,6 +32,14 @@ const ActivityList : React.FC<IProps> = ({activities, selectActivity}) => {
                             <div>{activity.venue}</div>
                         </Item.Description>
                         <Item.Extra>
+                            <Button
+                                name={activity.id}
+                                loading={target===activity.id && submitting}
+                                floated='right'
+                                content='Supprimer'
+                                color='red'  
+                                onClick={(e)=>deleteActivity(e,activity.id)}             
+                            />
                             <Button 
                                 floated='right'
                                 content='Voir'

@@ -43,7 +43,7 @@ namespace Application.Activities
                    Venue = request.Venue, 
                    Date = request.Date, 
                 };
-                
+                // pas besoin de thread
                 _context.Activities.Add(activity);
                   
                 var success = await _context.SaveChangesAsync()>0;//?Unit.Value:

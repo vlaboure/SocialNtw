@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {SyntheticEvent} from 'react'
 import {Grid} from 'semantic-ui-react'
 import {IActivity} from '../../../App/model/activity'
 import ActivityList from './ActivityList'
@@ -10,10 +10,15 @@ interface IProps {
     //tableau d'activités passées en paramètre à ActivityDashboard
     activities: IActivity[];
     selectActivity: (id: string)=>void;
+    deleteActivity: (e: SyntheticEvent<HTMLButtonElement>, id: string)=>void;
     selectedActivity: IActivity;
     editMode : boolean;
     setEditMode: (editMode: boolean)=> void;
     setSelectedActvity: (activity: IActivity | null)=>void;
+    createActivity:(activity: IActivity)=>void;
+    editActivity:(actvity: IActivity)=>void;
+    submitting: boolean;
+    target: string;
 }
 
 // {activities} équivaut à props mais permet l'utilisation directement
@@ -21,16 +26,24 @@ interface IProps {
 const ActivityDashboard: React.FC<IProps> = ({
         activities, 
         selectActivity,
+        deleteActivity,
         selectedActivity, 
         editMode, 
         setEditMode,
-        setSelectedActvity}) => {
+        setSelectedActvity,
+        createActivity,
+        editActivity,
+        submitting,
+        target}) => {
     return (
         <Grid>
             <Grid.Column width={10}>
                 <ActivityList 
                     activities={activities}
-                    selectActivity = {selectActivity}                                    
+                    selectActivity = {selectActivity}     
+                    deleteActivity = {deleteActivity}   
+                    submitting = {submitting} 
+                    target = {target}                           
                 />
             </Grid.Column>
             <Grid.Column width={6}>
@@ -43,8 +56,15 @@ const ActivityDashboard: React.FC<IProps> = ({
                 )}
                 {editMode &&
                 <ActivityForm 
+                    // le fait de créer une key permet de forcer le unmount
+                    // et le réaffichage quand selectedActivity change
+                    //selectedActivity && selectedActivity.id || 0 evite erreur si rien de sélectionné
+                    key = {(selectedActivity && selectedActivity.id) || 0}                    
                     setEditMode ={setEditMode} 
-                    activity={selectedActivity}
+                    activity={selectedActivity!}
+                    createActivity={createActivity}
+                    editActivity={editActivity}
+                    submitting = {submitting}   
                 />}
             </Grid.Column>
         </Grid>

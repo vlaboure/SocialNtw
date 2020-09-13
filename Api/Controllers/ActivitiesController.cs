@@ -20,13 +20,14 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Activity>>> List()
         {
-            // création de l'objet Li st de Application.Activities
+                           //new car on crée un nouveau objet list<actitvity>
             return await _mediator.Send(new List.Query());
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Activity>> Detail(Guid id)
         {
+                                    //new car on crée un nouveau objet actitvity
             return await _mediator.Send(new Details.Query(){Id = id});
         }
         [HttpPost]

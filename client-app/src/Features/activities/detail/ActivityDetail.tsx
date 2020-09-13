@@ -2,7 +2,7 @@ import React from 'react'
 import {Image, Card, Icon, Button, ButtonGroup, SearchCategory } from 'semantic-ui-react'
 import { IActivity } from '../../../App/model/activity'
 import { act } from 'react-dom/test-utils'
-import { isNull } from 'util'
+
 
 interface IProps{
   activity: IActivity;
