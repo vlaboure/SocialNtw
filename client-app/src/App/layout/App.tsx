@@ -1,4 +1,4 @@
-import React, {useState, useEffect, Fragment, SyntheticEvent} from 'react';
+import React, {useState, useEffect, Fragment, SyntheticEvent,useContext} from 'react';
 import { Header, Icon, List, Container } from 'semantic-ui-react'
 import { render } from '@testing-library/react';
 import axios from 'axios'
@@ -7,7 +7,10 @@ import NavBar from '../../Features/nav/NavBar';
 import ActivityDashboard from '../../Features/activities/dashboard/ActivityDashboard'
 import agent from '../api/agent'
 import LoadingComponent from '../layout/LoadingComponent'
+import ActivityStores from '../stores/activityStores';
+import { observer } from 'mobx-react-lite';
 const App = ()=>{
+  const activityStore = useContext(ActivityStores)
   const [activities, setActivities] = useState<IActivity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
  // const [editActivity, setEditedActivity] = useState<IActivity>()
@@ -60,36 +63,23 @@ const App = ()=>{
 
   // useEffect appelé après chaque affichage
   useEffect(()=>{
-    agent.Activities.list()
-    .then(response => {      
-      //mise en forme de la date avant de la mettre dans activities
-      //on remplit le tableau avec les valeurs splitées
-      //response = tableau initial
-      let activities : IActivity[] = [];
-      response.forEach((activity) => {
-        //supprimer la partie après l'heure
-        activity.date = activity.date.split('.')[0];
-        activities.push(activity);
-      });
-      setActivities(activities)
-    }).then(()=>setLoading(false));
-  }, []);
+   activityStore.loadActivity()}, [activityStore]);
 
   //c'est ici qu'on appelle le composant si loading = true
-  if(loading) return <LoadingComponent content='chargement en cours...'/>
+  if(activityStore.loadingInitial) return <LoadingComponent content='chargement en cours...'/>
 
   return ( 
     <Fragment>
       <NavBar openCreateForm = {handleOpenCreateForm}/>
       {/* Affichage des valeurs du array values */}
       <Container style= {{marginTop: '7rem'}}>
-        <ActivityDashboard 
-          activities={activities}
-          selectActivity={handleSelectedActivity}
+        <ActivityDashboard         
+          activities={activityStore.activities}
+          selectActivity={activityStore.selectActivity}
 // {selectedActivity!}==== le ! permet de passer une erreur IActivity or null           
-          selectedActivity={selectedActivity!}
-          editMode = {editMode}
-          setEditMode = {setEditMode}
+        //  selectedActivity={selectedActivity!}
+        //  editMode = {editMode}
+         // setEditMode = {setEditMode}
           setSelectedActvity={setSelectedActivity}
           createActivity={handleCreateActivity}
           editActivity={handleEditActivity}
@@ -102,5 +92,5 @@ const App = ()=>{
   );          
 }
 
-export default App;
+export default observer(App);
 

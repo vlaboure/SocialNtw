@@ -1,10 +1,12 @@
-import React, { useState, FormEvent } from 'react'
+import React, { useState, FormEvent, useContext } from 'react'
 import { Segment, Form, Button } from 'semantic-ui-react'
 import { IActivity } from '../../../App/model/activity'
 import {v4 as uuid} from 'uuid'
+import ActivityStores from '../../../App/stores/activityStores'
+
 
 interface IProps{
-    setEditMode : (editMode: boolean)=>void;
+   // setEditMode : (editMode: boolean)=>void;
     activity: IActivity;
     createActivity:(activity: IActivity)=>void;
     editActivity:(actvity: IActivity)=>void;
@@ -12,7 +14,7 @@ interface IProps{
 }
 
 const ActivityForm : React.FC<IProps> = ({
-    setEditMode,
+  //  setEditMode,
     activity: initialFormState,
     createActivity,
     editActivity,
@@ -56,7 +58,8 @@ const ActivityForm : React.FC<IProps> = ({
             editActivity(activity);
         }
     }
-
+    const activityStores = useContext(ActivityStores);
+    const {selectActivity} = activityStores;
     const [activity, setActivity] = useState<IActivity>(intitialiseForm);
     return (
         <Segment clearing>
@@ -105,7 +108,7 @@ const ActivityForm : React.FC<IProps> = ({
                     floated = 'right' 
                     negative type = 'button' 
                     content = 'Annuler'
-                    onClick = {()=>setEditMode(false)}
+               //     onClick = {()=>setEditMode(false)}
                 />
             </Form>
         </Segment>
