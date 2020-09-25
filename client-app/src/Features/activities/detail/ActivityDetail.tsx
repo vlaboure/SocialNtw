@@ -2,17 +2,17 @@ import React, { useContext } from 'react'
 import {Image, Card, Icon, Button, ButtonGroup, SearchCategory } from 'semantic-ui-react'
 import { IActivity } from '../../../App/model/activity'
 import { act } from 'react-dom/test-utils'
-import ActivityStores from '../../../App/stores/activityStores'
+import ActivityStores from '../../../App/stores/activityStore'
 import { observer } from 'mobx-react-lite'
 
 
 interface IProps{
 //  activity: IActivity;
  // setEditMode:(editMode: boolean)=> void;
-  setSelectedActivity:(activity: IActivity | null)=>void;
+ // setSelectedActivity:(activity: IActivity | null)=>void;
 }
 
-const ActivityDetail: React.FC<IProps> = ({setSelectedActivity}) => {
+const ActivityDetail: React.FC<IProps> = ({}) => {
   const activityStore = useContext(ActivityStores); 
   const {selectedActivity: activity, cancelSelectedActivity, openEditMode} = activityStore;   
   return (
@@ -33,7 +33,7 @@ const ActivityDetail: React.FC<IProps> = ({setSelectedActivity}) => {
             <Button   
               basic color='blue'
               content= 'Editer'
-              onClick={openEditMode}
+              onClick={()=>openEditMode(activity!.id)}
             />
             <Button   
                   basic color='grey'

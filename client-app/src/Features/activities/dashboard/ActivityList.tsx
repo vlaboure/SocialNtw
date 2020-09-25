@@ -2,31 +2,32 @@ import { observer } from 'mobx-react-lite'
 import React, { SyntheticEvent, useContext } from 'react'
 import { Item, Button, Label, Segment } from 'semantic-ui-react'
 import {IActivity} from '../../../App/model/activity'
-import ActivityStores from '../../../App/stores/activityStores'
+import ActivityStores from '../../../App/stores/activityStore'
 
 
 interface IProps {
     //tableau d'activités passées en paramètre à ActivityDashboard
     //activities: IActivity[];
    // selectActivity: (id: string)=>void;
-    deleteActivity: (event: SyntheticEvent<HTMLButtonElement>,id: string)=>void;
-    submitting : boolean;
-    target: string;
+  //  deleteActivity: (event: SyntheticEvent<HTMLButtonElement>,id: string)=>void;
+   // submitting : boolean;
+   // target: string;
 }
 
 const ActivityList : React.FC<IProps> = ({
     //activities, 
    // selectActivity, 
-    deleteActivity,
-    submitting,
-    target}) => {
+   // deleteActivity,
+   // submitting,
+   // target
+}) => {
     const activityStores = useContext(ActivityStores);
-    const {activities, selectActivity} = activityStores;
+    const {activityByDate, selectActivity, deleteActivity, submitting, target} = activityStores;
     return (
         <Segment clearing>
             <Item.Group divided>            
 {/* !! parenthése pour la fonction fléchée car plusieurs lignes                 */}
-                {activities.map(activity =>(
+                {activityByDate.map(activity =>(
                     <Item key={activity.id} >
                     <Item.Content>
                         <Item.Header as='a'>{activity.title}</Item.Header>
@@ -50,7 +51,7 @@ const ActivityList : React.FC<IProps> = ({
                                 color='blue'
                                 onClick={() => selectActivity(activity.id)}
                             />
-                            <Label content='Catégorie'/>
+                            <Label content={activity.category}/>
                         </Item.Extra>
                     </Item.Content>
                     </Item>

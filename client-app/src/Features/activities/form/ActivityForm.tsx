@@ -2,24 +2,31 @@ import React, { useState, FormEvent, useContext } from 'react'
 import { Segment, Form, Button } from 'semantic-ui-react'
 import { IActivity } from '../../../App/model/activity'
 import {v4 as uuid} from 'uuid'
-import ActivityStores from '../../../App/stores/activityStores'
+import ActivityStore from '../../../App/stores/activityStore'
 
 
 interface IProps{
    // setEditMode : (editMode: boolean)=>void;
     activity: IActivity;
-    createActivity:(activity: IActivity)=>void;
-    editActivity:(actvity: IActivity)=>void;
-    submitting:boolean;
+ //   createActivity:(activity: IActivity)=>void;
+ //   editActivity:(actvity: IActivity)=>void;
+    //submitting:boolean;
 }
 
 const ActivityForm : React.FC<IProps> = ({
   //  setEditMode,
     activity: initialFormState,
-    createActivity,
-    editActivity,
-    submitting}) => {
+   // createActivity,
+   // editActivity,
+  //  submitting,
+}) => {
+    
+    const activityStore= useContext(ActivityStore)
+    //#region 
+    //   Remplace createActivity:(activity: IActivity)=>void;
+    const {createActivity,cancelOpenForm,submitting, editActivity} = activityStore
 
+    //#endregion
     const intitialiseForm = ()=>{
         //important evite de retourner un objet non créé
         if(initialFormState){
@@ -36,6 +43,7 @@ const ActivityForm : React.FC<IProps> = ({
             }
         }
     }
+    const [activity, setActivity] = useState<IActivity>(intitialiseForm);
 //sans tupage : event : any
     const handlInputChange = (event :FormEvent<HTMLInputElement | HTMLTextAreaElement>)=>{
         //pour simplifier l'écriture et éviter le envent.target
@@ -58,9 +66,9 @@ const ActivityForm : React.FC<IProps> = ({
             editActivity(activity);
         }
     }
-    const activityStores = useContext(ActivityStores);
-    const {selectActivity} = activityStores;
-    const [activity, setActivity] = useState<IActivity>(intitialiseForm);
+    // const activityStores = useContext(ActivityStore);
+    // const {selectActivity,cancelSelectedActivity} = activityStores;
+    // const [activity, setActivity] = useState<IActivity>(intitialiseForm);
     return (
         <Segment clearing>
             {/* sauvegarde -- onSubmit */}
@@ -100,15 +108,16 @@ const ActivityForm : React.FC<IProps> = ({
                     loading = {submitting}
                     floated = 'right' 
                     positive type = 'submit' 
-                    content = 'Soumettre'                   
+                    content = 'Soumettre'  
+
                 />                    
                 <Button 
                     name={activity.id}
-                    loading = {submitting}
+                   
                     floated = 'right' 
                     negative type = 'button' 
                     content = 'Annuler'
-               //     onClick = {()=>setEditMode(false)}
+                    onClick = {cancelOpenForm}
                 />
             </Form>
         </Segment>
