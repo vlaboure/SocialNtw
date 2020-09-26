@@ -1,26 +1,11 @@
 import { observer } from 'mobx-react-lite'
-import React, { SyntheticEvent, useContext } from 'react'
+import React, {useContext } from 'react'
 import { Item, Button, Label, Segment } from 'semantic-ui-react'
-import {IActivity} from '../../../App/model/activity'
 import ActivityStores from '../../../App/stores/activityStore'
+import { Link, NavLink } from 'react-router-dom'
 
 
-interface IProps {
-    //tableau d'activités passées en paramètre à ActivityDashboard
-    //activities: IActivity[];
-   // selectActivity: (id: string)=>void;
-  //  deleteActivity: (event: SyntheticEvent<HTMLButtonElement>,id: string)=>void;
-   // submitting : boolean;
-   // target: string;
-}
-
-const ActivityList : React.FC<IProps> = ({
-    //activities, 
-   // selectActivity, 
-   // deleteActivity,
-   // submitting,
-   // target
-}) => {
+const ActivityList : React.FC = () => {
     const activityStores = useContext(ActivityStores);
     const {activityByDate, selectActivity, deleteActivity, submitting, target} = activityStores;
     return (
@@ -46,10 +31,10 @@ const ActivityList : React.FC<IProps> = ({
                                 onClick={(e)=>deleteActivity(e,activity.id)}             
                             />
                             <Button 
+                                as={NavLink} to = {`/activities/${activity.id}`}
                                 floated='right'
                                 content='Voir'
-                                color='blue'
-                                onClick={() => selectActivity(activity.id)}
+                                color='blue'                            
                             />
                             <Label content={activity.category}/>
                         </Item.Extra>

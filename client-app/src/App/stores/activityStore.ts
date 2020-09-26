@@ -1,17 +1,20 @@
-import {observable, action,computed} from 'mobx'
-import { createComma } from 'typescript'
+import {observable, action, computed, configure, runInAction} from 'mobx'
 import { createContext, SyntheticEvent } from 'react'
 import { IActivity } from '../model/activity';
 import agent from '../api/agent';
-import ActivityList from '../../Features/activities/dashboard/ActivityList';
-
+//#region 
+// on veut forcer l'écriture ne mode strict
+//-->chaque modification d'un observable doit passer par une action
+//comme ---then---await---@action
+//#endregion
+configure({enforceActions:'always'});
 
 class ActivityStore{
   // map observable qui permet de rafraichir les tableaux
   @observable activityRegistery = new Map();
   @observable activities: IActivity[] = [];
   @observable loadingInitial = false;
-  @observable selectedActivity : IActivity | undefined;
+  @observable activity : IActivity | undefined;//selectedActivity
   @observable editMode = false;
   @observable submitting = false;
   @observable target = '';
@@ -28,33 +31,42 @@ class ActivityStore{
     //this.activities.sort((a,b)=> Date.parse(b.date) -Date.parse(a.date))
   };
 
-  @action loadActivity = async()=>{
+  @action loadActivities = async()=>{
     this.loadingInitial = true;
     try{
       const activities = await agent.Activities.list();
-      activities.forEach((activity) => {
-        //supprimer la partie après l'heure
-        activity.date = activity.date.split('.')[0];
-        this.activityRegistery.set(activity.id,activity);
-      });
+      runInAction('load activities',()=>{
+        activities.forEach((activity) => {
+          //supprimer la partie après l'heure
+          activity.date = activity.date.split('.')[0];
+          this.activityRegistery.set(activity.id,activity);
+          this.loadingInitial = false;
+        });
+      })
     }catch(error){
       console.log(error);
-      this.loadingInitial = false;
+      runInAction('error loading',()=>{
+        this.loadingInitial = false;
+      })      
     };
-    this.loadingInitial = false;
   }
 
   @action createActivity = async(activity: IActivity)=>{
     this.submitting = true;
     try{
       await agent.Activities.create(activity);
-      this.activityRegistery.set(activity.id, activity);
-      this.selectedActivity = activity;
-      this.submitting = false;
-      this.editMode = false;
+      runInAction('Create activity',()=>{
+        this.activityRegistery.set(activity.id, activity);
+        this.activity = activity;
+        this.submitting = false;
+        this.editMode = false;
+      });
+
     }catch(e){
       console.log(e);
-      this.submitting = false;
+      runInAction('Error create',()=>{
+        this.submitting = false;
+      })
     }
   }
 
@@ -62,14 +74,18 @@ class ActivityStore{
     this.submitting = true;
     try{
       await agent.Activities.update(activity);
-      this.activityRegistery.set(activity.id, activity);
-      this.selectedActivity = activity;
-      this.editMode = false;
-      this.submitting = false;
+      runInAction('Edit activity',()=>{
+        this.activityRegistery.set(activity.id, activity);
+        this.activity = activity;
+        this.editMode = false;
+        this.submitting = false;
+      });
 
     }catch(e){
+      runInAction('Error edit',()=>{
+        this.submitting = false; 
+      });
       console.log(e);
-      this.submitting = false; 
     }
   }
 
@@ -78,16 +94,21 @@ class ActivityStore{
     this.target = event.currentTarget.name;
     this.submitting = true;
     try{
-      await agent.Activities.delete(id)
+     await agent.Activities.delete(id)
      // this.activities = this.activities.filter(a => a.id !== id);
-     this.activityRegistery.delete(id); 
-     this.submitting = false;
-     this.target = '';
-     this.selectedActivity= undefined;
-    }catch(e){
-      console.log(e);
+     runInAction('delete Activity',()=>{
+      this.activityRegistery.delete(id); 
       this.submitting = false;
       this.target = '';
+      this.activity= undefined;
+     });
+
+    }catch(e){
+      runInAction('error delete',()=>{
+        this.submitting = false;
+        this.target = '';
+      });
+      console.log(e);
     }
    //setTarget(event.currentTarget.name)
    // agent.Activities.delete(id).then(()=>{
@@ -98,12 +119,47 @@ class ActivityStore{
   @action selectActivity = (id: string)=>{
     // dans video .filter(a => a.id === id) et selectedActivity : IActivity | undefined
     //this.selectedActivity = this.activities.find(a => a.id === id);
-    this.selectedActivity = this.activityRegistery.get(id);
+    this.activity = this.activityRegistery.get(id);
     this.editMode = (false);
+    this.loadingInitial = false;
+  }
+
+  @action loadActivity = async(id: string)=>{
+    let activity = this.getActivity(id);
+    // comme quand on passe par le routage, on se trouve en dehors de 
+    //actitityDashboard
+      // activityDetail est un enfant de actitityDashboard mais depuis 
+      // route, on est extérieur et on n'a pas accès aux valeurs
+      // on ne dispose que du lien cliqué :
+      //http://localhost:3000/activities/475e485c-1330-4ae5-9ac2-5fbace2770fa
+    if(activity){
+      this.activity = activity;
+      console.log(activity.title);
+      // ici activity=null
+    }else{// partie nécessaire si démarre avec un id et demarrage
+      this.loadingInitial = true;
+      try{
+        activity = await agent.Activities.detail(id);
+        runInAction('loading',()=>{
+          this.selectActivity = activity;
+          this.loadingInitial = false;
+        })
+        console.log("rien");
+      }catch(e){
+        console.log(e);
+        runInAction('error load',()=>{
+          this.loadingInitial = false;
+        })
+      }
+    }
+  }
+
+  getActivity = (id:string)=>{
+    return this.activityRegistery.get(id);
   }
 
   @action cancelSelectedActivity = ()=>{
-    this.selectedActivity = undefined;
+    this.activity = undefined;
   }
 
   // @action createActivity(activity: IActivity){
@@ -114,12 +170,12 @@ class ActivityStore{
     this.editMode = false;
   }
   @action openEditMode = (id: string)=>{
-    this.selectedActivity = this.activityRegistery.get(id)
+    this.activity = this.activityRegistery.get(id)
     this.editMode = true;
   }
   @action openCreateMode = ()=>{
     this.editMode = true;
-    this.selectedActivity = undefined;
+    this.activity = undefined;
   }
 }
 

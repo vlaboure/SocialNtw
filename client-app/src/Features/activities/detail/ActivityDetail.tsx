@@ -1,20 +1,31 @@
-import React, { useContext } from 'react'
-import {Image, Card, Icon, Button, ButtonGroup, SearchCategory } from 'semantic-ui-react'
-import { IActivity } from '../../../App/model/activity'
-import { act } from 'react-dom/test-utils'
+import React, { useContext, useEffect } from 'react'
+import {Image, Card, Button, ButtonGroup} from 'semantic-ui-react'
 import ActivityStores from '../../../App/stores/activityStore'
 import { observer } from 'mobx-react-lite'
+import { Link, RouteComponentProps } from 'react-router-dom'
+import LoadingComponent from '../../../App/layout/LoadingComponent'
 
-
-interface IProps{
-//  activity: IActivity;
- // setEditMode:(editMode: boolean)=> void;
- // setSelectedActivity:(activity: IActivity | null)=>void;
+interface detailParams{
+  id: string;
 }
 
-const ActivityDetail: React.FC<IProps> = ({}) => {
+const ActivityDetail: React.FC<RouteComponentProps<detailParams>> = ({match , history}) => {
   const activityStore = useContext(ActivityStores); 
-  const {selectedActivity: activity, cancelSelectedActivity, openEditMode} = activityStore;   
+  const {
+    selectActivity,
+    activity: activity,
+    cancelSelectedActivity, 
+    openEditMode, 
+    loadActivity, 
+    loadingInitial,
+  } = activityStore;   
+ 
+  useEffect(() => {
+    selectActivity(match.params.id)
+  }, [selectActivity,match.params.id])
+
+  if (loadingInitial || !activity) return <LoadingComponent content='chargement détail'/>
+
   return (
     //  fluid pour que la carte prenne toute la place dispo
     <Card fluid>
@@ -33,12 +44,13 @@ const ActivityDetail: React.FC<IProps> = ({}) => {
             <Button   
               basic color='blue'
               content= 'Editer'
-              onClick={()=>openEditMode(activity!.id)}
+              as= {Link} to = {`/manage/${activity.id}`}
             />
             <Button   
                   basic color='grey'
                   content= 'Annuler'
-                  onClick={cancelSelectedActivity}
+                  // history de RouteComponentProps
+                  onClick={()=>history.push('/activities')}
                 />
         </ButtonGroup>
     </Card.Content>

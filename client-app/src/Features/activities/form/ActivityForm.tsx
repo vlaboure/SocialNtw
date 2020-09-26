@@ -1,50 +1,66 @@
-import React, { useState, FormEvent, useContext } from 'react'
+import React, { useState, FormEvent, useContext, useEffect } from 'react'
 import { Segment, Form, Button } from 'semantic-ui-react'
 import { IActivity } from '../../../App/model/activity'
 import {v4 as uuid} from 'uuid'
 import ActivityStore from '../../../App/stores/activityStore'
+import { observer } from 'mobx-react-lite'
+import { RouteComponentProps } from 'react-router'
 
 
-interface IProps{
-   // setEditMode : (editMode: boolean)=>void;
-    activity: IActivity;
- //   createActivity:(activity: IActivity)=>void;
- //   editActivity:(actvity: IActivity)=>void;
-    //submitting:boolean;
+interface detailParams{
+    id:string;
 }
 
-const ActivityForm : React.FC<IProps> = ({
-  //  setEditMode,
-    activity: initialFormState,
-   // createActivity,
-   // editActivity,
-  //  submitting,
-}) => {
+const ActivityForm : React.FC<RouteComponentProps<detailParams>> = ({match, history}) => {
     
-    const activityStore= useContext(ActivityStore)
+    const activityStore= useContext(ActivityStore);
     //#region 
     //   Remplace createActivity:(activity: IActivity)=>void;
-    const {createActivity,cancelOpenForm,submitting, editActivity} = activityStore
+    const {
+        createActivity,
+        cancelOpenForm,
+        editActivity,
+        submitting,
+        activity: initialFormState,
+        loadActivity,
+        selectActivity,
+    } = activityStore;
 
     //#endregion
-    const intitialiseForm = ()=>{
-        //important evite de retourner un objet non créé
-        if(initialFormState){
-            return initialFormState    
-        }else {
-            return{
-                id:'',
-                title:'',
-                description:'',
-                category:'',
-                date:'',
-                city:'',
-                venue:'',
-            }
-        }
-    }
-    const [activity, setActivity] = useState<IActivity>(intitialiseForm);
-//sans tupage : event : any
+    // const intitialiseForm = ()=>{
+    //     //important evite de retourner un objet non créé
+    //     if(initialFormState){
+    //         return initialFormState    
+    //     }else {
+    //         return{
+    //             id:'',
+    //             title:'',
+    //             description:'',
+    //             category:'',
+    //             date:'',
+    //             city:'',
+    //             venue:'',
+    //         }
+    //     }
+    // }
+    useEffect(()=>{
+        selectActivity(match.params.id)
+        initialFormState && setActivity(initialFormState)
+    }, )
+
+    const [activity, setActivity] = useState<IActivity>({
+        id:'',
+        title:'',
+        description:'',
+        category:'',
+        date:'',
+        city:'',
+        venue:'',
+    });
+    
+
+
+//sans typage : event : any
     const handlInputChange = (event :FormEvent<HTMLInputElement | HTMLTextAreaElement>)=>{
         //pour simplifier l'écriture et éviter le envent.target
         const {name, value}= event.currentTarget;
@@ -66,9 +82,7 @@ const ActivityForm : React.FC<IProps> = ({
             editActivity(activity);
         }
     }
-    // const activityStores = useContext(ActivityStore);
-    // const {selectActivity,cancelSelectedActivity} = activityStores;
-    // const [activity, setActivity] = useState<IActivity>(intitialiseForm);
+
     return (
         <Segment clearing>
             {/* sauvegarde -- onSubmit */}
@@ -105,15 +119,14 @@ const ActivityForm : React.FC<IProps> = ({
                     placeholder = 'Localité' 
                     value = {activity.venue}/>
                 <Button 
+                    name={activity.id}
                     loading = {submitting}
                     floated = 'right' 
                     positive type = 'submit' 
                     content = 'Soumettre'  
-
                 />                    
                 <Button 
                     name={activity.id}
-                   
                     floated = 'right' 
                     negative type = 'button' 
                     content = 'Annuler'
@@ -124,4 +137,4 @@ const ActivityForm : React.FC<IProps> = ({
     )
 }
 
-export default ActivityForm
+export default observer(ActivityForm)
