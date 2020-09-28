@@ -12,10 +12,10 @@ configure({enforceActions:'always'});
 class ActivityStore{
   // map observable qui permet de rafraichir les tableaux
   @observable activityRegistery = new Map();
-  @observable activities: IActivity[] = [];
+ // @observable activities: IActivity[] = [];
   @observable loadingInitial = false;
-  @observable activity : IActivity | undefined;//selectedActivity
-  @observable editMode = false;
+  @observable activity : IActivity | null = null;//selectedActivity
+ // @observable editMode = false;
   @observable submitting = false;
   @observable target = '';
   
@@ -59,7 +59,7 @@ class ActivityStore{
         this.activityRegistery.set(activity.id, activity);
         this.activity = activity;
         this.submitting = false;
-        this.editMode = false;
+       // this.editMode = false;
       });
 
     }catch(e){
@@ -77,7 +77,7 @@ class ActivityStore{
       runInAction('Edit activity',()=>{
         this.activityRegistery.set(activity.id, activity);
         this.activity = activity;
-        this.editMode = false;
+     //  this.editMode = false;
         this.submitting = false;
       });
 
@@ -100,7 +100,7 @@ class ActivityStore{
       this.activityRegistery.delete(id); 
       this.submitting = false;
       this.target = '';
-      this.activity= undefined;
+      this.activity= null;
      });
 
     }catch(e){
@@ -120,7 +120,7 @@ class ActivityStore{
     // dans video .filter(a => a.id === id) et selectedActivity : IActivity | undefined
     //this.selectedActivity = this.activities.find(a => a.id === id);
     this.activity = this.activityRegistery.get(id);
-    this.editMode = (false);
+  //  this.editMode = (false);
     this.loadingInitial = false;
   }
 
@@ -154,29 +154,33 @@ class ActivityStore{
     }
   }
 
+  @action clearActivity = ()=>{
+    this.activity = null;
+  }
+
   getActivity = (id:string)=>{
     return this.activityRegistery.get(id);
   }
 
-  @action cancelSelectedActivity = ()=>{
-    this.activity = undefined;
-  }
-
-  // @action createActivity(activity: IActivity){
-  //   this.submitting = true;
-  //   agent.Activities.create(activity);
+  // @action cancelSelectedActivity = ()=>{
+  //   this.activity = null;
   // }
-  @action cancelOpenForm  = ()=>{
-    this.editMode = false;
-  }
-  @action openEditMode = (id: string)=>{
-    this.activity = this.activityRegistery.get(id)
-    this.editMode = true;
-  }
-  @action openCreateMode = ()=>{
-    this.editMode = true;
-    this.activity = undefined;
-  }
+
+  // // @action createActivity(activity: IActivity){
+  // //   this.submitting = true;
+  // //   agent.Activities.create(activity);
+  // // }
+  // @action cancelOpenForm  = ()=>{
+  //  // this.editMode = false;
+  // }
+  // @action openEditMode = (id: string)=>{
+  //   this.activity = this.activityRegistery.get(id)
+  //  // this.editMode = true;
+  // }
+  // @action openCreateMode = ()=>{
+  //  // this.editMode = true;
+  //   this.activity = null;
+  // }
 }
 
 export default createContext(new ActivityStore())

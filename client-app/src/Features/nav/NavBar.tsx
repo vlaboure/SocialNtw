@@ -1,4 +1,4 @@
-import { Link, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
 import React, {useContext} from 'react'
 import {Menu, Container, Button} from 'semantic-ui-react'
@@ -26,8 +26,7 @@ const NavBar: React.FC = () => {
             <Button 
               as={NavLink} to='/createActivity'
               positive 
-              content='Créer un post'
-              onClick= {activityStore.openCreateMode}
+              content='Créer un post'              
             />
           </Menu.Item>
 

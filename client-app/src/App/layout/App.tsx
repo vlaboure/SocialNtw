@@ -5,35 +5,37 @@ import ActivityDashboard from '../../Features/activities/dashboard/ActivityDashb
 import LoadingComponent from '../layout/LoadingComponent'
 import ActivityStores from '../stores/activityStore';
 import { observer } from 'mobx-react-lite';
-import {Route} from 'react-router-dom'
+import {Route, RouteComponentProps, withRouter} from 'react-router-dom'
 import HomePage from '../../Features/home/HomePage'
 import ActivityForm from '../../Features/activities/form/ActivityForm';
 import ActivityDetail from '../../Features/activities/detail/ActivityDetail';
 
-const App = ()=>{
-  const activityStore = useContext(ActivityStores)
-
-  // useEffect appelé après chaque affichage
-  useEffect(()=>{
-   activityStore.loadActivities()}, [activityStore]);
-
-  //c'est ici qu'on appelle le composant si loading = true
-  if(activityStore.loadingInitial) return <LoadingComponent content='chargement en cours...'/>
+                                     //location -- propriété de RouteComponentProps
+const App : React.FC<RouteComponentProps> = ({location})=>{
 
   return ( 
     <Fragment>
-      <NavBar/>
-      {/* Affichage des valeurs du array values */}
-      <Container style= {{marginTop: '7rem'}}>
-        {/* Route exact path: afficher que si localhost:3000 */}
-        <Route exact path='/' component={HomePage}/>
-        <Route exact path='/activities' component={ActivityDashboard}/>
-        <Route path='/activities/:id' component={ActivityDetail}/>
-        <Route path={['/createActivity','/manage/:id']} component={ActivityForm}/>
-      </Container>
-    </Fragment  >
+        {/* si on est à la racine que le HomePage */}
+      <Route exact path='/' component={HomePage}/>
+        {/* si quelquechose après / -->{'/(.+)'} */}
+        {/* affichage du menu */}
+      <Route path={'/(.+)'} render={()=>(
+        <Fragment>
+          <NavBar/>
+          {/* Affichage des valeurs du array values */}
+          <Container style= {{marginTop: '7rem'}}>
+            {/* Route exact path: afficher que si localhost:3000 */}
+    
+            <Route exact path='/activities' component={ActivityDashboard}/>
+            <Route path='/activities/:id' component={ActivityDetail}/>
+            <Route key={location.key} path={['/createActivity','/manage/:id']} component={ActivityForm}/>
+          </Container>
+        </Fragment>
+      )}/>
+
+    </Fragment >
   );          
 }
 
-export default observer(App);
+export default withRouter(observer(App));
 

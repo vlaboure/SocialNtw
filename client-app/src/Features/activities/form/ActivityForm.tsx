@@ -18,12 +18,12 @@ const ActivityForm : React.FC<RouteComponentProps<detailParams>> = ({match, hist
     //   Remplace createActivity:(activity: IActivity)=>void;
     const {
         createActivity,
-        cancelOpenForm,
         editActivity,
         submitting,
         activity: initialFormState,
         loadActivity,
         selectActivity,
+        clearActivity
     } = activityStore;
 
     //#endregion
@@ -44,9 +44,15 @@ const ActivityForm : React.FC<RouteComponentProps<detailParams>> = ({match, hist
     //     }
     // }
     useEffect(()=>{
-        selectActivity(match.params.id)
+        if(match.params.id && activity== null)
+            selectActivity(match.params.id)
         initialFormState && setActivity(initialFormState)
-    }, )
+        // ici on veut nettoyer pour si on clique sur create dans edit
+        //on appelle une fonction que l'on crée ds activityStore
+        return ()=>{
+            clearActivity();
+        }
+    },[loadActivity,match.params.id,clearActivity, initialFormState])
 
     const [activity, setActivity] = useState<IActivity>({
         id:'',
@@ -77,9 +83,9 @@ const ActivityForm : React.FC<RouteComponentProps<detailParams>> = ({match, hist
                 ...activity,
                 id : uuid()//pour le guid
             }
-            createActivity(newActivity);
+            createActivity(newActivity).then(()=>history.push(`/activities/${newActivity.id}`));
         }else{
-            editActivity(activity);
+            editActivity(activity).then(()=>history.push(`/activities/${activity.id}`));;
         }
     }
 
@@ -130,7 +136,7 @@ const ActivityForm : React.FC<RouteComponentProps<detailParams>> = ({match, hist
                     floated = 'right' 
                     negative type = 'button' 
                     content = 'Annuler'
-                    onClick = {cancelOpenForm}
+                    onClick={()=>history.push('/activities')}
                 />
             </Form>
         </Segment>

@@ -25,7 +25,7 @@ namespace Api
                 {
                     var context = services.GetRequiredService<DataContext>();
                     context.Database.Migrate();
-                    // appel de Seed
+                    // appel de Seed pour créer la bdd et les tables
                     Seed.SeedData(context);
                 }
                 catch(Exception ex)

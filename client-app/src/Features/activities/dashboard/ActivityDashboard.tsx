@@ -1,18 +1,25 @@
-import React, {useContext} from 'react'
+import React, { useContext, useEffect } from 'react'
 import {Grid} from 'semantic-ui-react'
 import ActivityList from './ActivityList'
-import ActivityDetail from '../detail/ActivityDetail'
-import ActivityForm from '../form/ActivityForm'
 import { observer } from 'mobx-react-lite'
 import ActivityStores from '../../../App/stores/activityStore'
+import LoadingComponent from '../../../App/layout/LoadingComponent'
 
 
 // {activities} équivaut à props mais permet l'utilisation directement
 // de activities et non props.activities
 const ActivityDashboard: React.FC = () => {
-    const activityStore = useContext(ActivityStores);
+    //const activityStore = useContext(ActivityStores);
             // ici on met {} car 2 variables
-    
+            const activityStore = useContext(ActivityStores)
+
+            // useEffect appelé après chaque affichage
+            useEffect(()=>{
+             activityStore.loadActivities()}, [activityStore]);
+          
+            //c'est ici qu'on appelle le composant si loading = true
+            if(activityStore.loadingInitial) return <LoadingComponent content='chargement en cours...'/>
+          
     return (    
         <Grid>
             <Grid.Column width={10}>

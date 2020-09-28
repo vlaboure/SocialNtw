@@ -13,10 +13,7 @@ const ActivityDetail: React.FC<RouteComponentProps<detailParams>> = ({match , hi
   const activityStore = useContext(ActivityStores); 
   const {
     selectActivity,
-    activity: activity,
-    cancelSelectedActivity, 
-    openEditMode, 
-    loadActivity, 
+    activity,
     loadingInitial,
   } = activityStore;   
  
