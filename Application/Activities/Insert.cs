@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -17,8 +18,21 @@ namespace Application.Activities
             public string Category { get; set; }
             public string City { get; set; }
             public string Venue { get; set; }
-            public DateTime Date { get; set; }
+            public DateTime? Date { get; set; }
 
+        }
+
+        public class CommandValidator : AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.Title).NotEmpty();
+                RuleFor(x => x.Venue).NotEmpty();
+                RuleFor(x => x.Description).NotEmpty();
+                RuleFor(x => x.Date).NotEmpty();
+                RuleFor(x => x.City).NotEmpty();
+                RuleFor(x => x.Category).NotEmpty();
+            }
         }
         public class Handler : IRequestHandler<Command>
         {
@@ -38,8 +52,8 @@ namespace Application.Activities
                 activity.Category = request.Category ?? activity.Category;
                 activity.City = request.City ?? activity.City;
                 activity.Venue = request.Venue ?? activity.Venue;
-                //request.Date!=null)?request.Date:activity.Date;
-                activity.Date = DateTime.Today;
+                activity.Date= request.Date ?? activity.Date;
+                //activity.Date = DateTime.Today;
 
                 var success = await _context.SaveChangesAsync()>0;
                 if(success) return Unit.Value;

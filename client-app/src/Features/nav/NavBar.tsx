@@ -9,8 +9,7 @@ import activityStores from '../../App/stores/activityStore'
 // }
 
 const NavBar: React.FC = () => {
-  const activityStore = useContext(activityStores)
-
+ 
   return (
       <Menu fixed='top' inverted>
         <Container>

@@ -2,6 +2,7 @@ import {observable, action, computed, configure, runInAction} from 'mobx'
 import { createContext, SyntheticEvent } from 'react'
 import { IActivity } from '../model/activity';
 import agent from '../api/agent';
+import { tokenToString } from 'typescript';
 //#region 
 // on veut forcer l'écriture ne mode strict
 //-->chaque modification d'un observable doit passer par une action
@@ -27,9 +28,24 @@ class ActivityStore{
     //comme activityRegistery n'est pas un array, 
     //on récupère un iterable des valeurs du observable map
     //on convertit en Array--> Array.from()...
-    return Array.from(this.activityRegistery.values()).sort((a,b)=> Date.parse(b.date) -Date.parse(a.date));
+    const tt = this.groupActivityByDate(Array.from(this.activityRegistery.values()));
+    console.log(tt);
+    return tt;
     //this.activities.sort((a,b)=> Date.parse(b.date) -Date.parse(a.date))
   };
+
+  groupActivityByDate(activities: IActivity[]){
+    const sortedActivities = 
+    activities.sort((a,b)=> Date.parse(b.date) -Date.parse(a.date));
+      // reduce crée un tableau clé/valeur
+      // retourne un tableau d'objets tableau clé valeur
+      return Object.entries(sortedActivities.reduce((activities,activity)=>{
+        //on crée la clé avec la date
+        const date = activity.date.split('T')[0];
+        activities[date] = activities[date]? [...activities[date],activity] : [activity];
+        return activities;
+      }, {}as {[key : string] : IActivity[]}))
+  }
 
   @action loadActivities = async()=>{
     this.loadingInitial = true;
@@ -72,7 +88,8 @@ class ActivityStore{
 
   @action editActivity = async(activity: IActivity)=>{
     this.submitting = true;
-    try{
+    console.log(activity);
+    try{      
       await agent.Activities.update(activity);
       runInAction('Edit activity',()=>{
         this.activityRegistery.set(activity.id, activity);
@@ -80,13 +97,13 @@ class ActivityStore{
      //  this.editMode = false;
         this.submitting = false;
       });
-
     }catch(e){
       runInAction('Error edit',()=>{
         this.submitting = false; 
       });
       console.log(e);
     }
+    console.log(activity);
   }
 
   @action deleteActivity = async(event: SyntheticEvent <HTMLButtonElement>,id : string)=>{

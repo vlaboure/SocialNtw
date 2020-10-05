@@ -1,9 +1,7 @@
-import React, {useEffect, Fragment,useContext} from 'react';
+import React, {Fragment} from 'react';
 import {Container } from 'semantic-ui-react'
 import NavBar from '../../Features/nav/NavBar';
 import ActivityDashboard from '../../Features/activities/dashboard/ActivityDashboard'
-import LoadingComponent from '../layout/LoadingComponent'
-import ActivityStores from '../stores/activityStore';
 import { observer } from 'mobx-react-lite';
 import {Route, RouteComponentProps, withRouter} from 'react-router-dom'
 import HomePage from '../../Features/home/HomePage'

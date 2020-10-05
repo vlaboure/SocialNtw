@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore;
 using Persistence;
 using MediatR;
 using Application.Activities;
+using FluentValidation.AspNetCore;
+using Api.Middleware;
 
 namespace Api
 {
@@ -32,7 +34,6 @@ namespace Api
             services.AddDbContext<DataContext>(opt => {
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
-            services.AddControllers();
             // AddMediatR --> 2eme paramèter params ---- OPTIONNEL
             services.AddMediatR(typeof(List.Handler).Assembly);
             services.AddCors(opt =>
@@ -42,15 +43,24 @@ namespace Api
                     policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
                 });
             });
+             services.AddControllers()
+            // injection de fluent sur la classe Create
+            //----- le fait de l'injcter dans une classe permettra de l'utiliser
+            //      dans les autre classes
+                .AddFluentValidation(cfg =>{
+                     cfg.RegisterValidatorsFromAssemblyContaining<Create>();
+                });             
+           
            }
            
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+           
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                 app.UseDeveloperExceptionPage();
             }
 
 // pas de certificats pour le https
